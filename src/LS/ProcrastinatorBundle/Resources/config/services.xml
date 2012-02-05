@@ -21,16 +21,14 @@
             id="procrastinator.executor.decorator.php_fpm"
             class="Procrastinator\Executor\Decorator\PhpFpmExecutorDecorator"
             public="false">
-            <!-- Wrapped executor inserted via configuration -->
-            <argument />
+            <argument /> <!-- Wrapped executor inserted via configuration -->
         </service>
 
         <service
             id="procrastinator.executor.decorator.doctrine_event_conditional"
             class="Procrastinator\Executor\Decorator\DoctrineEventConditionalExecutorDecorator"
             public="false">
-            <!-- Wrapped executor inserted via configuration -->
-            <argument />
+            <argument /> <!-- Wrapped executor inserted via configuration -->
         </service>
     </services>
 </container>

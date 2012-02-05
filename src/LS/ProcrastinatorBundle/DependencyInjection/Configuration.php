@@ -37,6 +37,19 @@ class Configuration implements ConfigurationInterface
                                 )
                         )
                         ->prototype('scalar')
+                        ->validate()
+                            ->ifTrue(
+                                function($v) {
+                                    return in_array(
+                                        $v,
+                                        array(
+                                            'procrastinator.executor.real',
+                                            'procrastinator.executor',
+                                        )
+                                    );
+                                }
+                            )->thenInvalid('For internal usage only')
+                        ->end()
                         ->end()
                     ->end()
                 ->end()
