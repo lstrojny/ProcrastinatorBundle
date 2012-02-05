@@ -18,6 +18,8 @@ class MyController ...
                     ->setSubject('hello')
                     ->setBody('new entry');
         $mailer = $this->get('mailer');
+
+
         $this->get('procrastinator')->register(
             new Deferred(
                 'sendMail',
@@ -25,6 +27,7 @@ class MyController ...
                     $mailer->send($message);
                 }
         );
+
 
         $em = $this->get('doctrine.orm.default_entity_manager');
         $em->persist($entry);
