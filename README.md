@@ -1,5 +1,7 @@
 # Procrastinator for PHP: do stuff later
 
+Symfony2 integration for [Procrastinator](https://github.com/lstrojny/Procrastinator)
+
 ### Example usage in controller to execute event only if the postFlush event in Doctrine occured
 ```php
 <?php
