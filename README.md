@@ -6,6 +6,7 @@ Symfony2 integration for [Procrastinator](https://github.com/lstrojny/Procrastin
 ```php
 <?php
 use Procrastinator\Deferred\DoctrineEventConditionalDeferred as Deferred;
+use Doctrine\ORM\Events as OrmEvents;
 
 class MyController ...
 {
@@ -25,7 +26,8 @@ class MyController ...
                 'sendMail',
                 function() use ($mailer, $message) {
                     $mailer->send($message);
-                }
+                },
+                OrmEvents::postFlush
         );
 
 
