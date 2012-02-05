@@ -1,4 +1,4 @@
-# Procrastinator for PHP: do stuff later
+# ProcrastinatorBundle for Symfony2: do stuff later
 
 Symfony2 integration for [Procrastinator](https://github.com/lstrojny/Procrastinator)
 
