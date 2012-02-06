@@ -21,13 +21,13 @@ class MyController ...
         $mailer = $this->get('mailer');
 
 
-        $this->get('procrastinator')->register(
-            new Deferred(
-                'sendMail',
-                function() use ($mailer, $message) {
-                    $mailer->send($message);
-                },
-                OrmEvents::postFlush
+        $procrastinator->register(
+            $procrastinator
+                ->newDeferred()
+                ->ifDoctrineEvent(OrmEvents::postFlush)
+                ->name('sendMail')
+                ->call(function() use ($mailer, $message) { $mailer->send($message); })
+                ->build()
         );
 
 
