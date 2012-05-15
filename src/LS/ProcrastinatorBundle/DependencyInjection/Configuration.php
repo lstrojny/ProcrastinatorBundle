@@ -30,6 +30,7 @@ class Configuration implements ConfigurationInterface
                 ->children()
                     ->arrayNode('decorators')
                         ->addDefaultsIfNotSet()
+                        ->performNoDeepMerging()
                         ->defaultValue(
                                 array(
                                     'procrastinator.executor.decorator.php_fpm',
