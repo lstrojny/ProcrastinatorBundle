@@ -6,6 +6,7 @@
         <parameter key="procrastinator.class">Procrastinator\DeferralManager</parameter>
         <parameter key="procrastinator.executor.class">Procrastinator\Executor\SingleThreadExecutor</parameter>
         <parameter key="procrastinator.scheduler.class">Procrastinator\Scheduler\OnShutdownScheduler</parameter>
+        <parameter key="procrastinator_set_time_limit_timeout">30</parameter>
     </parameters>
 
     <services>
@@ -29,6 +30,14 @@
             class="Procrastinator\Executor\Decorator\DoctrineEventConditionalExecutorDecorator"
             public="false">
             <argument /> <!-- Wrapped executor inserted via configuration -->
+        </service>
+
+        <service
+            id="procrastinator.executor.decorator.set_time_limit"
+            class="Procrastinator\Executor\Decorator\SetTimeLimitDecorator"
+            public="false">
+            <argument /> <!-- Wrapped executor inserted via configuration -->
+            <argument type="string">%procrastinator_set_time_limit_timeout%</argument>
         </service>
     </services>
 </container>
