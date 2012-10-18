@@ -29,7 +29,6 @@ class Configuration implements ConfigurationInterface
                 ->addDefaultsIfNotSet()
                 ->children()
                     ->arrayNode('decorators')
-                        ->addDefaultsIfNotSet()
                         ->performNoDeepMerging()
                         ->defaultValue(
                                 array(
