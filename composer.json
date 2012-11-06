@@ -1,0 +1,17 @@
+{
+    "name": "lstrojny/procrastinator-bundle",
+    "description": "Symfony2 integration for Procrastinator",
+    "license": "MIT",
+    "require": {
+        "lstrojny/procrastinator": "dev-master"
+    },
+    "authors": [
+        {
+            "name": "Lars Strojny",
+            "email": "lstrojny@php.net"
+        }
+    ],
+    "autoload": {
+        "psr-0": {"LS\\ProcrastinatorBundle": "src"}
+    }
+}
