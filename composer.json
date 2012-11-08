@@ -1,6 +1,6 @@
 {
     "name": "lstrojny/procrastinator-bundle",
-    "description": "Symfony2 integration for Procrastinator",
+    "description": "Symfony2 integration for Procrastinator (lstrojny/procrastinator)",
     "license": "MIT",
     "require": {
         "lstrojny/procrastinator": "dev-master"
