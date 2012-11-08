@@ -3,6 +3,7 @@
     "description": "Symfony2 integration for Procrastinator (lstrojny/procrastinator)",
     "license": "MIT",
     "require": {
+        "php": ">=5.3.0",
         "lstrojny/procrastinator": "dev-master"
     },
     "authors": [
