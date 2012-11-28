@@ -5,7 +5,7 @@
     <parameters>
         <parameter key="procrastinator.class">Procrastinator\DeferralManager</parameter>
         <parameter key="procrastinator.executor.class">Procrastinator\Executor\SingleThreadExecutor</parameter>
-        <parameter key="procrastinator.scheduler.class">Procrastinator\Scheduler\OnShutdownScheduler</parameter>
+        <parameter key="procrastinator.scheduler.class">Procrastinator\Scheduler\ImmediateScheduler</parameter>
         <parameter key="procrastinator_set_time_limit_timeout">30</parameter>
     </parameters>
 

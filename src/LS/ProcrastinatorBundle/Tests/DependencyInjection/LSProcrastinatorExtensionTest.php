@@ -5,6 +5,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use LS\ProcrastinatorBundle\DependencyInjection\LSProcrastinatorExtension;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 class LSProcrastinatorExtensionTest extends TestCase
 {
@@ -70,114 +71,86 @@ class LSProcrastinatorExtensionTest extends TestCase
         $this->assertTrue($container->hasParameter('procrastinator.scheduler.class'));
     }
 
-    public function testMixedCustomDecoratorChain()
-    {
-        $container = new ContainerBuilder();
-        $def = new Definition();
-        $def->addArgument('placeholder');
-        $container->setDefinition('decorator1', clone $def);
-        $container->setDefinition('decorator2', clone $def);
-        $container->setDefinition('decorator3', clone $def);
-        $loader = new LSProcrastinatorExtension();
-        $loader->load(
-            array(
-                'ls_procrastinator' => array(
-                    'executor' => array(
-                        'decorators' => array(
-                            'decorator1',
-                            'procrastinator.executor.decorator.php_fpm',
-                            'decorator2',
-                            'procrastinator.executor.decorator.doctrine_event_conditional',
-                            'decorator3',
-                        )
-                    )
-                )
-            ),
-            $container
-        );
-
-        $this->assertSame('decorator1', (string)$container->getAlias('procrastinator.executor'));
-
-        $definition = $container->getDefinition('decorator1');
-        $this->assertSame('procrastinator.executor.decorator.php_fpm', (string)$definition->getArgument(0));
-
-        $definition = $container->getDefinition('procrastinator.executor.decorator.php_fpm');
-        $this->assertSame('decorator2', (string)$definition->getArgument(0));
-
-        $definition = $container->getDefinition('decorator2');
-        $this->assertSame('procrastinator.executor.decorator.doctrine_event_conditional', (string)$definition->getArgument(0));
-
-        $definition = $container->getDefinition('procrastinator.executor.decorator.doctrine_event_conditional');
-        $this->assertSame('decorator3', (string)$definition->getArgument(0));
-
-        $definition = $container->getDefinition('decorator3');
-        $this->assertSame('procrastinator.executor.real', (string)$definition->getArgument(0));
-    }
-
-
-    public function testCustomDecoratorChain()
-    {
-        $container = new ContainerBuilder();
-        $def = new Definition();
-        $def->addArgument('placeholder');
-        $container->setDefinition('decorator1', clone $def);
-        $container->setDefinition('decorator2', clone $def);
-        $container->setDefinition('decorator3', clone $def);
-        $loader = new LSProcrastinatorExtension();
-        $loader->load(
-            array(
-                'ls_procrastinator' => array(
-                    'executor' => array(
-                        'decorators' => array(
-                            'decorator1',
-                            'decorator2',
-                            'decorator3',
-                        )
-                    )
-                )
-            ),
-            $container
-        );
-
-        $this->assertSame('decorator1', (string)$container->getAlias('procrastinator.executor'));
-
-        $definition = $container->getDefinition('decorator1');
-        $this->assertSame('decorator2', (string)$definition->getArgument(0));
-
-        $definition = $container->getDefinition('decorator2');
-        $this->assertSame('decorator3', (string)$definition->getArgument(0));
-
-        $definition = $container->getDefinition('decorator3');
-        $this->assertSame('procrastinator.executor.real', (string)$definition->getArgument(0));
-    }
-
     public function testRealExecutorMayNotBeInChain()
     {
-        $container = new ContainerBuilder();
-        $loader = new LSProcrastinatorExtension();
-
         $this->setExpectedException(
             'Symfony\Component\Config\Definition\Exception\InvalidConfigurationException',
             'Invalid configuration for path "ls_procrastinator.executor.decorators.0": For internal usage only'
         );
-        $loader->load(
-            array('ls_procrastinator' => array('executor' => array('decorators' => array('procrastinator.executor.real')))),
-            $container
+        $this->createContainer(
+            null,
+            false,
+            array('executor' => array('decorators' => array('procrastinator.executor.real')))
         );
     }
 
     public function testExecutorAliasMayNotBeInChain()
     {
-        $container = new ContainerBuilder();
-        $loader = new LSProcrastinatorExtension();
-
         $this->setExpectedException(
             'Symfony\Component\Config\Definition\Exception\InvalidConfigurationException',
             'Invalid configuration for path "ls_procrastinator.executor.decorators.0": For internal usage only'
         );
-        $loader->load(
-            array('ls_procrastinator' => array('executor' => array('decorators' => array('procrastinator.executor')))),
-            $container
+        $this->createContainer(
+            null,
+            false,
+            array('executor' => array('decorators' => array('procrastinator.executor')))
         );
+    }
+
+    public function testSchedulerIsImmediateScheduler()
+    {
+        $container = $this->createContainer();
+        $this->assertSame('Procrastinator\Scheduler\ImmediateScheduler', $container->getParameter('procrastinator.scheduler.class'));
+        $this->assertInstanceOf('Procrastinator\Scheduler\ImmediateScheduler', $container->get('procrastinator.scheduler'));
+    }
+
+    public function testGettingProcrastinator()
+    {
+        $this->assertInstanceOf('Procrastinator\DeferralManager', $this->createContainer()->get('procrastinator'));
+    }
+
+    protected function createContainer($file = null, $debug = false, array $config = array(), array $definitions = array())
+    {
+        $container = new ContainerBuilder(new ParameterBag(array('kernel.debug' => $debug)));
+        $container->registerExtension(new LSProcrastinatorExtension());
+
+        $this->loadFromFile($container, $file);
+
+        $container->addDefinitions($definitions);
+        $container->loadFromExtension('ls_procrastinator', $config);
+
+        $container->getCompilerPassConfig()->setOptimizationPasses(array());
+        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->compile();
+
+        return $container;
+    }
+
+    private function loadFromFile(ContainerBuilder $container, $file)
+    {
+        if ($file === null) {
+            return;
+        }
+
+        $locator = new FileLocator($this->getContainerFixturePath());
+        switch (substr($file, -3)) {
+            case 'xml':
+                $loader = new XmlFileLoader($container, $locator);
+                break;
+
+            case 'yml':
+                $loader = new YamlFileLoader($container, $locator);
+                break;
+
+            case 'xml':
+                $loader = new PhpFileLoader($container, $locator);
+                break;
+
+            default:
+                throw new InvalidArgumentException('Invalid file type');
+                break;
+        }
+
+        $loader->load($file);
     }
 }
