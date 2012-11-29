@@ -4,7 +4,6 @@ php:
   - 5.4
 
 env:
-  - SF2_VERSION=2.0
   - SF2_VERSION=2.1
   - SF2_VERSION=dev-master
 
