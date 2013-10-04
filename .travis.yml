@@ -6,6 +6,8 @@ php:
 
 env:
   - SF2_VERSION=2.1
+  - SF2_VERSION=2.2
+  - SF2_VERSION=2.3
   - SF2_VERSION=dev-master
 
 before_script:
