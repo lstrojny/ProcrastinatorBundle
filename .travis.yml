@@ -9,11 +9,11 @@ env:
   - SF2_VERSION=2.1
   - SF2_VERSION=2.2
   - SF2_VERSION=2.3
+  - SF2_VERSION=2.4
 
 before_script:
-  - wget http://getcomposer.org/composer.phar
-  - php composer.phar require symfony/framework-bundle:${SF2_VERSION}
-  - php composer.phar install --dev
+  - composer require symfony/framework-bundle:${SF2_VERSION}
+  - composer install --dev
 
 notifications:
   email:
