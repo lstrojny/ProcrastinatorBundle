@@ -13,8 +13,4 @@ env:
 
 before_script:
   - composer require symfony/framework-bundle:${SF2_VERSION}
-  - composer install --dev
-
-notifications:
-  email:
-    - lstrojny@php.net
+  - composer install
