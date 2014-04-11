@@ -1,4 +1,4 @@
-# ProcrastinatorBundle for Symfony2: do stuff later [![Build Status](https://secure.travis-ci.org/lstrojny/ProcrastinatorBundle.svg)](http://travis-ci.org/lstrojny/ProcrastinatorBundle)
+# ProcrastinatorBundle for Symfony2: do stuff later [![Build Status](https://secure.travis-ci.org/lstrojny/ProcrastinatorBundle.svg)](http://travis-ci.org/lstrojny/ProcrastinatorBundle) [![Dependency Status](https://www.versioneye.com/user/projects/523ed7f8632bac1b1400bff0/badge.png)](https://www.versioneye.com/user/projects/523ed7f8632bac1b1400bff0)
 
 Symfony2 integration for [Procrastinator](https://github.com/lstrojny/Procrastinator)
 
