@@ -6,10 +6,10 @@ php:
   - hhvm
 
 env:
-  - SF2_VERSION=2.1
   - SF2_VERSION=2.2
   - SF2_VERSION=2.3
   - SF2_VERSION=2.4
+  - SF2_VERSION=2.5
 
 before_script:
   - composer require symfony/framework-bundle:${SF2_VERSION}
