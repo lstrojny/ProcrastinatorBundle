@@ -1,3 +1,4 @@
 /nbproject
-composer.lock
-vendor
+/composer.lock
+/vendor/
+/build/

@@ -31,10 +31,10 @@ class Configuration implements ConfigurationInterface
                     ->arrayNode('decorators')
                         ->performNoDeepMerging()
                         ->defaultValue(
-                                array(
-                                    'procrastinator.executor.decorator.php_fpm',
-                                    'procrastinator.executor.decorator.doctrine_event_conditional'
-                                )
+                            [
+                                'procrastinator.executor.decorator.php_fpm',
+                                'procrastinator.executor.decorator.doctrine_event_conditional'
+                            ]
                         )
                         ->prototype('scalar')
                         ->validate()
@@ -42,10 +42,8 @@ class Configuration implements ConfigurationInterface
                                 function($v) {
                                     return in_array(
                                         $v,
-                                        array(
-                                            'procrastinator.executor.real',
-                                            'procrastinator.executor',
-                                        )
+                                        ['procrastinator.executor.real', 'procrastinator.executor'],
+                                        true
                                     );
                                 }
                             )->thenInvalid('For internal usage only')

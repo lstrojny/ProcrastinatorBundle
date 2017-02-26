@@ -8,4 +8,3 @@
 
 ## Symfony Integration
   - Doctrine conditional event integration [DONE]
-  - Monolog integration [OPEN]

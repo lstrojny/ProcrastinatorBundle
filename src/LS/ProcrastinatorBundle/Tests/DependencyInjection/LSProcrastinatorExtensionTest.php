@@ -1,10 +1,19 @@
 <?php
 namespace LS\ProcrastinatorBundle\Tests\DependencyInjection;
 
-use PHPUnit_Framework_TestCase as TestCase;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+use InvalidArgumentException;
 use LS\ProcrastinatorBundle\DependencyInjection\LSProcrastinatorExtension;
-use Symfony\Component\DependencyInjection\Definition;
+use PHPUnit\Framework\TestCase;
+use Procrastinator\DeferralManager;
+use Procrastinator\Executor\Decorator\DoctrineEventConditionalExecutorDecorator;
+use Procrastinator\Executor\Decorator\PhpFpmExecutorDecorator;
+use Procrastinator\Scheduler\ImmediateScheduler;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 class LSProcrastinatorExtensionTest extends TestCase
@@ -13,7 +22,7 @@ class LSProcrastinatorExtensionTest extends TestCase
     {
         $container = new ContainerBuilder();
         $loader = new LSProcrastinatorExtension();
-        $loader->load(array(), $container);
+        $loader->load([], $container);
 
         $this->assertTrue($container->hasDefinition('procrastinator'));
         $this->assertTrue($container->hasDefinition('procrastinator.executor.real'));
@@ -25,18 +34,18 @@ class LSProcrastinatorExtensionTest extends TestCase
     {
         $container = new ContainerBuilder();
         $loader = new LSProcrastinatorExtension();
-        $loader->load(array(), $container);
+        $loader->load([], $container);
 
         $this->assertSame('procrastinator.executor.decorator.php_fpm', (string)$container->getAlias('procrastinator.executor'));
         $this->assertFalse($container->getAlias('procrastinator.executor')->isPublic());
 
         $definition = $container->getDefinition('procrastinator.executor.decorator.php_fpm');
-        $this->assertSame('Procrastinator\Executor\Decorator\PhpFpmExecutorDecorator', $definition->getClass());
+        $this->assertSame(PhpFpmExecutorDecorator::class, $definition->getClass());
         $this->assertFalse($definition->isPublic());
         $this->assertSame('procrastinator.executor.decorator.doctrine_event_conditional', (string)$definition->getArgument(0));
 
         $definition = $container->getDefinition('procrastinator.executor.decorator.doctrine_event_conditional');
-        $this->assertSame('Procrastinator\Executor\Decorator\DoctrineEventConditionalExecutorDecorator', $definition->getClass());
+        $this->assertSame(DoctrineEventConditionalExecutorDecorator::class, $definition->getClass());
         $this->assertFalse($definition->isPublic());
         $this->assertSame('procrastinator.executor.real', (string)$definition->getArgument(0));
     }
@@ -45,7 +54,7 @@ class LSProcrastinatorExtensionTest extends TestCase
     {
         $container = new ContainerBuilder();
         $loader = new LSProcrastinatorExtension();
-        $loader->load(array('ls_procrastinator' => array('executor' => array('decorators' => array()))), $container);
+        $loader->load(['ls_procrastinator' => ['executor' => ['decorators' => []]]], $container);
 
         $this->assertSame('procrastinator.executor.real', (string)$container->getAlias('procrastinator.executor'));
     }
@@ -54,7 +63,7 @@ class LSProcrastinatorExtensionTest extends TestCase
     {
         $container = new ContainerBuilder();
         $loader = new LSProcrastinatorExtension();
-        $loader->load(array(), $container);
+        $loader->load([], $container);
 
         $tags = $container->getDefinition('procrastinator.executor.decorator.doctrine_event_conditional')->getTags();
         $this->assertGreaterThan(10, count($tags['doctrine.event_listener']));
@@ -64,7 +73,7 @@ class LSProcrastinatorExtensionTest extends TestCase
     {
         $container = new ContainerBuilder();
         $loader = new LSProcrastinatorExtension();
-        $loader->load(array(), $container);
+        $loader->load([], $container);
 
         $this->assertTrue($container->hasParameter('procrastinator.class'));
         $this->assertTrue($container->hasParameter('procrastinator.executor.class'));
@@ -73,45 +82,41 @@ class LSProcrastinatorExtensionTest extends TestCase
 
     public function testRealExecutorMayNotBeInChain()
     {
-        $this->setExpectedException(
-            'Symfony\Component\Config\Definition\Exception\InvalidConfigurationException',
-            'Invalid configuration for path "ls_procrastinator.executor.decorators.0": For internal usage only'
-        );
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('Invalid configuration for path "ls_procrastinator.executor.decorators.0": For internal usage only');
         $this->createContainer(
             null,
             false,
-            array('executor' => array('decorators' => array('procrastinator.executor.real')))
+            ['executor' => ['decorators' => ['procrastinator.executor.real']]]
         );
     }
 
     public function testExecutorAliasMayNotBeInChain()
     {
-        $this->setExpectedException(
-            'Symfony\Component\Config\Definition\Exception\InvalidConfigurationException',
-            'Invalid configuration for path "ls_procrastinator.executor.decorators.0": For internal usage only'
-        );
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('Invalid configuration for path "ls_procrastinator.executor.decorators.0": For internal usage only');
         $this->createContainer(
             null,
             false,
-            array('executor' => array('decorators' => array('procrastinator.executor')))
+            ['executor' => ['decorators' => ['procrastinator.executor']]]
         );
     }
 
     public function testSchedulerIsImmediateScheduler()
     {
         $container = $this->createContainer();
-        $this->assertSame('Procrastinator\Scheduler\ImmediateScheduler', $container->getParameter('procrastinator.scheduler.class'));
-        $this->assertInstanceOf('Procrastinator\Scheduler\ImmediateScheduler', $container->get('procrastinator.scheduler'));
+        $this->assertSame(ImmediateScheduler::class, $container->getParameter('procrastinator.scheduler.class'));
+        $this->assertInstanceOf(ImmediateScheduler::class, $container->get('procrastinator.scheduler'));
     }
 
     public function testGettingProcrastinator()
     {
-        $this->assertInstanceOf('Procrastinator\DeferralManager', $this->createContainer()->get('procrastinator'));
+        $this->assertInstanceOf(DeferralManager::class, $this->createContainer()->get('procrastinator'));
     }
 
-    protected function createContainer($file = null, $debug = false, array $config = array(), array $definitions = array())
+    protected function createContainer($file = null, $debug = false, array $config = [], array $definitions = [])
     {
-        $container = new ContainerBuilder(new ParameterBag(array('kernel.debug' => $debug)));
+        $container = new ContainerBuilder(new ParameterBag(['kernel.debug' => $debug]));
         $container->registerExtension(new LSProcrastinatorExtension());
 
         $this->loadFromFile($container, $file);
@@ -119,8 +124,8 @@ class LSProcrastinatorExtensionTest extends TestCase
         $container->addDefinitions($definitions);
         $container->loadFromExtension('ls_procrastinator', $config);
 
-        $container->getCompilerPassConfig()->setOptimizationPasses(array());
-        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->getCompilerPassConfig()->setOptimizationPasses([]);
+        $container->getCompilerPassConfig()->setRemovingPasses([]);
         $container->compile();
 
         return $container;
@@ -142,7 +147,7 @@ class LSProcrastinatorExtensionTest extends TestCase
                 $loader = new YamlFileLoader($container, $locator);
                 break;
 
-            case 'xml':
+            case 'php':
                 $loader = new PhpFileLoader($container, $locator);
                 break;
 

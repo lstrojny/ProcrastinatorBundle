@@ -8,7 +8,7 @@
         "symfony/framework-bundle": ">=2.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4"
+        "phpunit/phpunit": "~6"
     },
     "authors": [
         {
