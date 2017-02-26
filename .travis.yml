@@ -7,6 +7,10 @@ php:
   - nightly
   - hhvm
 
+matrix:
+  allow_failures:
+    - php: hhvm
+
 env:
   - SF2_VERSION=2.2
   - SF2_VERSION=2.3
